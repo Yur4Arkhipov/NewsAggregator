@@ -1,0 +1,37 @@
+package com.example.newsaggregator.ui.news
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.newsaggregator.data.rss.RssFeed
+import com.example.newsaggregator.data.rss.dto.RssDto
+import com.example.newsaggregator.ui.UiState
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class NewsListScreenViewModel @Inject constructor(
+    private val feed: RssFeed
+): ViewModel() {
+
+    private val _newsState = MutableStateFlow<UiState<RssDto>>(UiState.Idle)
+    val newsState: StateFlow<UiState<RssDto>> get() = _newsState
+
+    init {
+        loadNews()
+    }
+
+    fun loadNews() {
+        _newsState.value = UiState.Loading
+        viewModelScope.launch {
+            try {
+                val result = feed.getRss()
+                _newsState.value = UiState.Success(result)
+            } catch (e: Exception) {
+                _newsState.value = UiState.Error(message = "Error: ${e.message}")
+            }
+        }
+    }
+}
