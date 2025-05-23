@@ -46,6 +46,12 @@ android {
     room {
         schemaDirectory("$projectDir/schemas")
     }
+    kotlin {
+        sourceSets.all {
+            languageSettings.optIn("kotlinx.serialization.ExperimentalSerializationApi")
+        }
+    }
+
 }
 
 dependencies {
@@ -99,4 +105,7 @@ dependencies {
 
     // recycler
     implementation(libs.androidx.recyclerview)
+
+    // navigation
+    implementation(libs.androidx.navigation.compose)
 }

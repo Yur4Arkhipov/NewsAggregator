@@ -2,8 +2,8 @@ package com.example.newsaggregator.ui.news
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.newsaggregator.data.rss.RssFeed
 import com.example.newsaggregator.data.rss.dto.RssDto
+import com.example.newsaggregator.domain.use_case.GetNewsUseCase
 import com.example.newsaggregator.ui.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NewsListScreenViewModel @Inject constructor(
-    private val feed: RssFeed
+    private val getNewsUseCase: GetNewsUseCase
 ): ViewModel() {
 
     private val _newsState = MutableStateFlow<UiState<RssDto>>(UiState.Idle)
@@ -27,7 +27,7 @@ class NewsListScreenViewModel @Inject constructor(
         _newsState.value = UiState.Loading
         viewModelScope.launch {
             try {
-                val result = feed.getRss()
+                val result = getNewsUseCase()
                 _newsState.value = UiState.Success(result)
             } catch (e: Exception) {
                 _newsState.value = UiState.Error(message = "Error: ${e.message}")

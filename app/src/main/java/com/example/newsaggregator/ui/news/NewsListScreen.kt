@@ -1,6 +1,7 @@
 package com.example.newsaggregator.ui.news
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,7 +43,8 @@ import com.example.newsaggregator.ui.UiState
 @Composable
 fun NewsListScreen(
     modifier: Modifier = Modifier,
-    viewModel: NewsListScreenViewModel = hiltViewModel()
+    viewModel: NewsListScreenViewModel = hiltViewModel(),
+    onNewsCardClick: (String) -> Unit
 ) {
     val uiState by viewModel.newsState.collectAsState()
 
@@ -62,7 +64,7 @@ fun NewsListScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(rss.channel.items) { item ->
-                    NewsCard(item = item)
+                    NewsCard(item = item, onClick = { onNewsCardClick(item.guid) })
                 }
             }
         }
@@ -82,12 +84,14 @@ fun NewsListScreen(
 @Composable
 fun NewsCard(
     item: ItemDto,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
+            .clickable { onClick() }
             .wrapContentHeight(),
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(4.dp)
