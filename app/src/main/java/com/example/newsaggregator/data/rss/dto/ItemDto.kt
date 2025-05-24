@@ -1,5 +1,7 @@
 package com.example.newsaggregator.data.rss.dto
 
+import com.example.newsaggregator.data.db.News
+import com.example.newsaggregator.data.db.dto.Category
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
@@ -41,3 +43,18 @@ data class ItemDto(
     val dcDate: String
 
 )
+
+fun ItemDto.toEntity(): News {
+    return News(
+        url = guid,
+        title = title,
+        description = description,
+        imageUrl = contents.getOrNull(1)?.url,
+        publishedTime = pubDate,
+        dcCreator = dcCreator,
+        categories = categories.map { Category(it.domain, it.value) }
+    )
+}
+
+
+

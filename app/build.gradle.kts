@@ -108,4 +108,12 @@ dependencies {
 
     // navigation
     implementation(libs.androidx.navigation.compose)
+
+//    // moshi
+//    implementation(libs.squareup.moshi)
+//    ksp(libs.moshi.kotlin.codegen)
+//    implementation(libs.moshi.adapters)
+
+    // serialization
+    implementation(libs.kotlinx.serialization.json)
 }

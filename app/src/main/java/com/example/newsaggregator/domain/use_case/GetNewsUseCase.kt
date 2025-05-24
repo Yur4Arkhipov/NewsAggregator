@@ -1,13 +1,13 @@
 package com.example.newsaggregator.domain.use_case
 
-import com.example.newsaggregator.data.rss.dto.RssDto
-import com.example.newsaggregator.domain.repository.RssRepository
+import com.example.newsaggregator.data.db.News
+import com.example.newsaggregator.domain.repository.NewsRepository
 import javax.inject.Inject
 
 class GetNewsUseCase @Inject constructor(
-    private val repository: RssRepository
+    private val repository: NewsRepository
 ) {
-    suspend operator fun invoke(): RssDto {
-        return repository.getRss()
+    suspend operator fun invoke(): List<News> {
+        return repository.getNews()
     }
 }

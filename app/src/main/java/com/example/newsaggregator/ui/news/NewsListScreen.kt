@@ -28,6 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -35,8 +37,10 @@ import androidx.compose.ui.unit.sp
 import androidx.core.text.HtmlCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.example.newsaggregator.data.rss.dto.ItemDto
-import com.example.newsaggregator.data.rss.dto.RssDto
+import coil.request.CachePolicy
+import coil.request.ImageRequest
+import com.example.newsaggregator.R
+import com.example.newsaggregator.data.db.News
 import com.example.newsaggregator.ui.UiState
 
 
@@ -58,13 +62,13 @@ fun NewsListScreen(
             }
         }
         is UiState.Success -> {
-            val rss = (uiState as UiState.Success<RssDto>).data
+            val newsList = (uiState as UiState.Success<List<News>>).data
             LazyColumn(
                 modifier = modifier,
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                items(rss.channel.items) { item ->
-                    NewsCard(item = item, onClick = { onNewsCardClick(item.guid) })
+                items(newsList) { news ->
+                    NewsCard(item = news, onClick = { onNewsCardClick(news.url) })
                 }
             }
         }
@@ -80,13 +84,19 @@ fun NewsListScreen(
     }
 }
 
+
+/**
+ * Кэширования картинок добиться не удалось
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun NewsCard(
-    item: ItemDto,
+    item: News,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -97,16 +107,27 @@ fun NewsCard(
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(Modifier.padding(10.dp)) {
-            item.contents.getOrNull(1)?.url?.let { imageUrl ->
+            item.imageUrl?.let { imageUrl ->
+                val imageRequest = ImageRequest.Builder(context)
+                    .data(imageUrl)
+                    .crossfade(true)
+                    .diskCachePolicy(CachePolicy.ENABLED)
+                    .memoryCachePolicy(CachePolicy.ENABLED)
+                    .networkCachePolicy(CachePolicy.ENABLED)
+                    .build()
+
                 AsyncImage(
-                    model = imageUrl,
+                    model = imageRequest,
                     contentDescription = item.title,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
                         .clip(RoundedCornerShape(12.dp)),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(R.drawable.placeholder),
+                    error = painterResource(R.drawable.placeholder)
                 )
+
 
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -124,13 +145,13 @@ fun NewsCard(
             Spacer(Modifier.height(8.dp))
 
             Text(
-                text = item.dcCreator,
+                text = item.dcCreator.toString(),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(5.dp))
-            Text(text = item.pubDate)
+            Text(text = item.publishedTime)
 
             if (item.categories.isNotEmpty()) {
                 Spacer(Modifier.height(8.dp))
